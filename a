@@ -1,0 +1,162 @@
+import cv2 
+import numpy as np
+ 
+import matplotlib.pyplot as plt
+
+import matplotlib.image as img
+def graphs(x):
+	plt.imshow(x)
+	plt.show()
+	
+im = cv2.imread("aachen_000010_000019_leftImg8bit.png")
+#graphs(gray_im)
+
+#graphs(im)
+
+
+
+thickness=1
+
+#
+
+boxesx1=[913.35,859.84,558.24,1235.23,1374.28,1301.31,954.49,
+450.67,1409.20,1447.94,1471.54,746.69,1586.89,1612.57,1898.87,
+1959.68,1682.24,1795.41,1906.05,720.30,789.48, ]
+boxesy1=[428.11,661.61,1011.8,409.87,396.49,400.14,415.41,
+412.01,378.36,380.41,371.41,403.59,401.87,575.80,426.31,
+414.49,514.99,486.28,475.30,341.01,306.45]
+boxesx2=[710.13,357.57,2.46,1109.97,1303.74,1224.69,797.68,
+328.15,1373.33,1410.84,1440.03,0.95,
+759.42,1495.18,1854.96,1906.47,1588.50,1710.11,1729.54,
+655.27,762.04]
+boxesy2=[348.94,347.84,299.20,344.20,352.71,349.06,348.88,
+354.99,351.77,352.99,349.58,2.26,0.00,296.25,300.47,301.32,
+1.50,213.49,2.35,237.98,252.99]
+
+print(boxesx1)
+
+for i in range (0,20):
+	if boxesx1[i]>boxesx2[i]:
+		c= boxesx1[i] 
+		d = boxesx2[i]
+		boxesx1.pop(i)
+		boxesx1.insert(i,d)
+		boxesx2.pop(i)
+		boxesx2.insert(i,c)
+	if boxesy1[i]>boxesy2[i]:
+		c1= boxesy1[i] 
+		d1 = boxesy2[i]
+		boxesy1.pop(i)
+		boxesy1.insert(i,d1)
+		boxesy2.pop(i)
+		boxesy2.insert(i,c1)
+	i = i+1
+
+#print(boxesx1)
+
+
+I_list = []
+
+#colors = np.random.randint((0, 255, 4, 3), dtype="uint8")
+
+for i in range (0,20):
+	x1 = int(boxesx1[i])
+	y1 = int(boxesy1[i])
+	x2 = int(boxesx2[i])
+	y2 = int(boxesy2[i])
+	
+	cv2.rectangle(im,(x1,y1), (x2,y2), (255, 0, 0), 1)
+	a = dict(x1=x1, x2=x2, y1=y1, y2=y2)
+	I_list.append(a)
+
+	
+	
+	#Текст
+	text = f"{[i]}"
+	(text_width, text_height) = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 9, 3)[0]
+	text_offset_x = x1
+	text_offset_y = y1 - 5
+	box_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width + 2, text_offset_y - text_height))
+	cv2.putText(im, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX,1, (100, 0, 0), 2)
+	#текст
+	
+	
+	i=i+1
+	
+#print(I_list)
+	
+def get_iou(bb1, bb2):
+    assert bb1['x1'] < bb1['x2']
+    assert bb1['y1'] < bb1['y2']
+    assert bb2['x1'] < bb2['x2']
+    assert bb2['y1'] < bb2['y2']
+
+    x_left = max(bb1['x1'], bb2['x1'])
+    y_top = max(bb1['y1'], bb2['y1'])
+    x_right = min(bb1['x2'], bb2['x2'])
+    y_bottom = min(bb1['y2'], bb2['y2'])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+ 
+    intersection_area = (x_right - x_left) * (y_bottom - y_top)
+
+  
+    bb1_area = (bb1['x2'] - bb1['x1']) * (bb1['y2'] - bb1['y1'])
+    bb2_area = (bb2['x2'] - bb2['x1']) * (bb2['y2'] - bb2['y1'])
+
+ 
+    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    assert iou >= 0.0
+    assert iou <= 1.0
+    print (iou)
+    return iou
+	
+	
+	
+	
+graphs(im)
+
+for i in range (0,19):
+	
+	get_iou(I_list[i],I_list[i+1])
+	
+	i=i+1
+
+
+
+
+
+
+
+
+
+#Данные полученные из Computer Vision Annotation Tool
+'''
+<image height="1024" width="2048" name="aachen_000010_000019_leftImg8bit.png" id="8">
+
+<box z_order="0" ybr="428.11" xbr="913.35" ytl="348.94" xtl="710.13" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="661.61" xbr="859.84" ytl="347.84" xtl="357.57" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="1011.86" xbr="558.24" ytl="299.20" xtl="2.46" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="409.87" xbr="1235.23" ytl="344.20" xtl="1109.97" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="396.49" xbr="1374.28" ytl="352.71" xtl="1303.74" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="400.14" xbr="1301.31" ytl="349.06" xtl="1224.69" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="415.41" xbr="954.49" ytl="348.88" xtl="797.68" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="412.01" xbr="450.67" ytl="354.99" xtl="328.15" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="378.36" xbr="1409.20" ytl="351.77" xtl="1373.33" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="380.41" xbr="1447.94" ytl="352.99" xtl="1410.84" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="371.41" xbr="1471.54" ytl="349.58" xtl="1440.03" source="manual" occluded="0" label="car"> </box>
+<box z_order="0" ybr="403.59" xbr="746.69" ytl="2.26" xtl="0.95" source="manual" occluded="0" label="Tree"> </box>
+<box z_order="0" ybr="401.87" xbr="1586.89" ytl="0.00" xtl="759.42" source="manual" occluded="0" label="Tree"> </box>
+<box z_order="0" ybr="575.80" xbr="1612.57" ytl="296.25" xtl="1495.18" source="manual" occluded="0" label="man"> </box>
+<box z_order="0" ybr="426.31" xbr="1898.87" ytl="300.47" xtl="1854.96" source="manual" occluded="0" label="man"> </box>
+<box z_order="0" ybr="414.49" xbr="1959.68" ytl="301.32" xtl="1906.47" source="manual" occluded="0" label="man"> </box>
+<box z_order="0" ybr="514.99" xbr="1682.24" ytl="1.50" xtl="1588.50" source="manual" occluded="0" label="sign"> </box>
+<box z_order="0" ybr="486.28" xbr="1795.41" ytl="213.49" xtl="1710.11" source="manual" occluded="0" label="sign"> </box>
+<box z_order="0" ybr="475.30" xbr="1906.05" ytl="2.35" xtl="1729.54" source="manual" occluded="0" label="sign"> </box>
+<box z_order="0" ybr="341.01" xbr="720.30" ytl="237.98" xtl="655.27" source="manual" occluded="0" label="sign"> </box>
+<box z_order="0" ybr="306.45" xbr="789.48" ytl="252.99" xtl="762.04" source="manual" occluded="0" label="sign"> </box>
+'''
+
+
